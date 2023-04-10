@@ -15,6 +15,10 @@ on:
       working_directory:
         required: true
         type: string
+      tf_apply:
+        required: true
+        default: 'false'
+        type: string
 
 jobs:
   terraform:
@@ -69,4 +73,13 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
         env:
           TF_RECREATE_MISSING_LAMBDA_PACKAGE: false
-        run: ./tf.sh plan -detailed-exitcode
+        run: ./tf.sh plan -no-color -out plan.tfplan -detailed-exitcode
+
+      # Apply
+      - name: Terraform apply
+        if: ${{ inputs.tf_apply == 'true' }}
+        working-directory: ${{ inputs.working_directory }}
+        env:
+          TF_AUTO_APPLY_SAVED_PLAN: true
+          TF_SKIP_BACKEND_INIT: true
+        run: ./tf.sh apply plan.tfplan
