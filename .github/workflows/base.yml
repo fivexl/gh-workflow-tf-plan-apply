@@ -16,7 +16,6 @@ on:
         required: true
         type: string
       tf_apply:
-        required: true
         default: 'false'
         type: string
 
