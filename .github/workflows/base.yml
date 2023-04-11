@@ -67,26 +67,24 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
         run: terraform fmt --recursive -check=true
 
-      # Set terraform plan command
-      - name: Set tf plan command if apply later needed
-        if: ${{ inputs.tf_apply == 'true' }}
-        run: |
-          echo "TF_PLAN_COMMAND='./tf.sh plan -no-color -out plan.tfplan'" >> $GITHUB_ENV
-
-      - name: Set tf plan command - check the config drift
+      # Run terraform plan - check config drift
+      - name: chech config drift
         if: ${{ inputs.tf_apply == 'false' }}
-        run: |
-          echo "TF_PLAN_COMMAND='./tf.sh plan -detailed-exitcode'" >> $GITHUB_ENV
-
-      # Run terraform plan, save plan to file
-      - name: terraform plan
         working-directory: ${{ inputs.working_directory }}
         env:
           TF_RECREATE_MISSING_LAMBDA_PACKAGE: false
-        run: ${{ env.TF_PLAN_COMMAND }}
+        run: ./tf.sh plan -detailed-exitcode
+
+      # Run terraform plan, save plan to file
+      - name: terraform plan
+        if: ${{ inputs.tf_apply == 'true' }}
+        working-directory: ${{ inputs.working_directory }}
+        env:
+          TF_RECREATE_MISSING_LAMBDA_PACKAGE: false
+        run: ./tf.sh plan -no-color -out plan.tfplan
 
       # Apply
-      - name: Terraform apply
+      - name: terraform apply
         if: ${{ inputs.tf_apply == 'true' }}
         working-directory: ${{ inputs.working_directory }}
         env:
