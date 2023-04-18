@@ -73,7 +73,7 @@ jobs:
         run: terraform fmt --recursive -check=true
 
       # Run terraform plan - check config drift
-      - name: chech config drift
+      - name: check config drift
         if: ${{ inputs.tf_apply == 'false' }}
         working-directory: ${{ inputs.working_directory }}
         env:
