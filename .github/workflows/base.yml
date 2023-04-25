@@ -12,8 +12,14 @@ on:
       aws_default_region:
         required: true
         type: string
+      aws_role_duration:
+        default: '1200'
+        type: string
       working_directory:
         required: true
+        type: string
+      tf_version:
+        default: 'v1.4.5'
         type: string
       tf_apply:
         default: 'false'
@@ -43,14 +49,14 @@ jobs:
         with:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ inputs.aws_region }}
-          role-duration-seconds: 2400
+          role-duration-seconds: ${{ inputs.aws_role_duration }}
           role-session-name: ${{ github.event.repository.name }}
 
       # Install terraform
       - name: setup terraform
         uses: hashicorp/setup-terraform@v2.0.3
         with:
-          terraform_version: 1.1.5
+          terraform_version: ${{ inputs.tf_version }}
           terraform_wrapper: false
 
       - name: Download tf.sh
