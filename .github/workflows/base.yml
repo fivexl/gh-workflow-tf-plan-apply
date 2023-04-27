@@ -15,6 +15,9 @@ on:
       aws_role_duration:
         default: '1200'
         type: string
+      aws_mask_account_id:
+        default: 'no'
+        type: string
       working_directory:
         required: true
         type: string
@@ -54,6 +57,7 @@ jobs:
           aws-region: ${{ inputs.aws_region }}
           role-duration-seconds: ${{ inputs.aws_role_duration }}
           role-session-name: ${{ github.event.repository.name }}
+          mask-aws-account-id: ${{ inputs.aws_mask_account_id }}
 
       # Install terraform
       - name: setup terraform
