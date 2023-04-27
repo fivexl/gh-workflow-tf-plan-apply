@@ -91,12 +91,11 @@ jobs:
         env:
           TF_RECREATE_MISSING_LAMBDA_PACKAGE: false
         run: |
-          #Set up additional env vars
+          #Set up additional env vars if there are any
           env_vars='${{ inputs.tf_additional_env_vars }}'
           if [[ -n "${env_vars}" ]]; then
             eval "$(echo "$env_vars" | jq -r 'keys[] as $k | "export \($k)=\(.[$k])"')"
           fi
-          env
           #Apply changes only if tf_apply=true, else just check the configuration drift 
           if ${{ inputs.tf_apply }}; then
             ./tf.sh plan -no-color -out plan.tfplan
