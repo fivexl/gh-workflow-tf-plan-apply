@@ -24,6 +24,9 @@ on:
       tf_apply:
         default: 'false'
         type: string
+      tf_additional_env_vars:
+        default: null
+        type: string
 
 jobs:
   terraform:
@@ -78,21 +81,22 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
         run: terraform fmt --recursive -check=true
 
-      # Run terraform plan - check config drift
-      - name: check config drift
-        if: ${{ inputs.tf_apply == 'false' }}
-        working-directory: ${{ inputs.working_directory }}
-        env:
-          TF_RECREATE_MISSING_LAMBDA_PACKAGE: false
-        run: ./tf.sh plan -detailed-exitcode
-
-      # Run terraform plan, save plan to file
+      # Run terraform plan
       - name: terraform plan
-        if: ${{ inputs.tf_apply == 'true' }}
         working-directory: ${{ inputs.working_directory }}
         env:
           TF_RECREATE_MISSING_LAMBDA_PACKAGE: false
-        run: ./tf.sh plan -no-color -out plan.tfplan
+        run: |
+          #Set up additional env vars
+          if [[ -n ${{ inputs.tf_additional_env_vars }} ]]; then
+            eval "$(echo ${{ inputs.tf_additional_env_vars }} | jq -r 'keys[] as $k | "export \($k)=\(.[$k])"')"
+          fi
+          #Apply changes only if tf_apply=true, else just check the configuration drift 
+          if ${{ inputs.tf_apply }}; then
+            ./tf.sh plan -no-color -out plan.tfplan
+          else
+            ./tf.sh plan -detailed-exitcode
+          fi
 
       # Apply
       - name: terraform apply
