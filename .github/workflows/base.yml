@@ -30,6 +30,9 @@ on:
       tf_additional_env_vars:
         default: null
         type: string
+      tf_recreate_missing_lambda_package:
+        default: 'false'
+        type: string
     outputs:
       tf_output:
         description: "The output of the tf output -json command"
@@ -95,7 +98,7 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
         env:
           TF_DATA_DIR_PER_ENV: false
-          TF_RECREATE_MISSING_LAMBDA_PACKAGE: false
+          TF_RECREATE_MISSING_LAMBDA_PACKAGE: ${{ inputs.tf_recreate_missing_lambda_package }}
         run: |
           #Set up additional env vars if there are any
           env_vars='${{ inputs.tf_additional_env_vars }}'
@@ -120,4 +123,4 @@ jobs:
           TF_SKIP_BACKEND_INIT: true
         run: |
           ./tf.sh apply plan.tfplan
-          echo "tf_output=$(terraform output -json)" >> $GITHUB_OUTPUT
+          echo "tf_output=$(terraform output -json | jq -c)" >> $GITHUB_OUTPUT
