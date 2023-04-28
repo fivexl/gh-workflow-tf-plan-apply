@@ -33,6 +33,9 @@ on:
       tf_recreate_missing_lambda_package:
         default: 'false'
         type: string
+      tf_upload_artifacts:
+        default: 'false'
+        type: string
     outputs:
       tf_output:
         description: "The output of the tf output -json command"
@@ -124,3 +127,11 @@ jobs:
         run: |
           ./tf.sh apply plan.tfplan
           echo "tf_output=$(terraform output -json | jq -c)" >> $GITHUB_OUTPUT
+      
+      - name: upload artifacts
+        if: ${{ inputs.tf_upload_artifacts == 'true' }}
+        uses: actions/upload-artifact@v3.1.2
+        working-directory: ${{ inputs.working_directory }}
+        with:
+          name: tf_artifacts
+          path: ./
