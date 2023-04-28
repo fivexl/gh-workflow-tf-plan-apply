@@ -30,6 +30,10 @@ on:
       tf_additional_env_vars:
         default: null
         type: string
+    outputs:
+      tf_output:
+        description: "The output of the tf output -json command"
+        value: ${{ jobs.terraform.outputs.tf_output }}
 
 jobs:
   terraform:
@@ -40,7 +44,8 @@ jobs:
     permissions:
       id-token: write
       contents: write
-
+    outputs:
+      tf_output: ${{ steps.apply.outputs.tf_output }}
 
     steps:
       # Checkout the repository to the GitHub Actions runner
@@ -89,6 +94,7 @@ jobs:
       - name: terraform plan
         working-directory: ${{ inputs.working_directory }}
         env:
+          TF_DATA_DIR_PER_ENV: false
           TF_RECREATE_MISSING_LAMBDA_PACKAGE: false
         run: |
           #Set up additional env vars if there are any
@@ -103,11 +109,15 @@ jobs:
             ./tf.sh plan -detailed-exitcode
           fi
 
-      # Apply
-      - name: terraform apply
+      # Apply, prepare output
+      - id: apply
+        name: terraform apply
         if: ${{ inputs.tf_apply == 'true' }}
         working-directory: ${{ inputs.working_directory }}
         env:
+          TF_DATA_DIR_PER_ENV: false
           TF_AUTO_APPLY_SAVED_PLAN: true
           TF_SKIP_BACKEND_INIT: true
-        run: ./tf.sh apply plan.tfplan
+        run: |
+          ./tf.sh apply plan.tfplan
+          echo "tf_output=$(terraform output -json)" >> $GITHUB_OUTPUT
