@@ -62,6 +62,7 @@ jobs:
 
       # Configure AWS
       - name: Configure AWS credentials
+        id: configure-aws-creds
         uses: aws-actions/configure-aws-credentials@v2.0.0
         with:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
@@ -100,7 +101,6 @@ jobs:
       - name: terraform plan
         working-directory: ${{ inputs.working_directory }}
         env:
-          TF_DATA_DIR_PER_ENV: false
           TF_RECREATE_MISSING_LAMBDA_PACKAGE: ${{ inputs.tf_recreate_missing_lambda_package }}
         run: |
           #Set up additional env vars if there are any
@@ -108,7 +108,7 @@ jobs:
           if [[ -n "${env_vars}" ]]; then
             eval "$(echo "$env_vars" | jq -r 'keys[] as $k | "export \($k)=\(.[$k])"')"
           fi
-          #Apply changes only if tf_apply=true, else just check the configuration drift 
+          #Prepare tfplan file if tf_apply=true, else just check the configuration drift 
           if ${{ inputs.tf_apply }}; then
             ./tf.sh plan -no-color -out plan.tfplan
           else
@@ -121,9 +121,9 @@ jobs:
         if: ${{ inputs.tf_apply == 'true' }}
         working-directory: ${{ inputs.working_directory }}
         env:
-          TF_DATA_DIR_PER_ENV: false
           TF_AUTO_APPLY_SAVED_PLAN: true
           TF_SKIP_BACKEND_INIT: true
+          TF_DATA_DIR: ./.terraform.${{ steps.configure-aws-creds.outputs.aws-account-id }}-${{ inputs.aws_region }}
         run: |
           ./tf.sh apply plan.tfplan
           echo "tf_output=$(terraform output -json | jq -c)" >> $GITHUB_OUTPUT
