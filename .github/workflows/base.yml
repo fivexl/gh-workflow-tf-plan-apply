@@ -36,6 +36,9 @@ on:
       tf_upload_artifacts:
         default: 'false'
         type: string
+      tf_sh_version:
+        default: '0.2.0'
+        type: string
     outputs:
       tf_output:
         description: "The output of the tf output -json command"
@@ -80,7 +83,7 @@ jobs:
 
       - name: Download tf.sh
         working-directory: ${{ inputs.working_directory }}
-        run: curl https://releases.fivexl.io/tf/v0.2.0/tf.sh --output tf.sh && chmod +x ./tf.sh
+        run: curl https://releases.fivexl.io/tf/v${{ inputs.tf_sh_version }}/tf.sh --output tf.sh && chmod +x ./tf.sh
 
       # Initialize
       - name: terraform init
