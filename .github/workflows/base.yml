@@ -128,6 +128,11 @@ jobs:
           TF_SKIP_BACKEND_INIT: true
           TF_DATA_DIR: ./.terraform.${{ steps.configure-aws-creds.outputs.aws-account-id }}-${{ inputs.aws_region }}
         run: |
+          #Set up additional env vars if there are any
+          env_vars='${{ inputs.tf_additional_env_vars }}'
+          if [[ -n "${env_vars}" ]]; then
+            eval "$(echo "$env_vars" | jq -r 'keys[] as $k | "export \($k)=\(.[$k])"')"
+          fi
           ./tf.sh apply plan.tfplan
           echo "tf_output=$(terraform output -json | jq -c)" >> $GITHUB_OUTPUT
       
