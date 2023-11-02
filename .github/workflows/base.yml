@@ -27,6 +27,9 @@ on:
       tf_apply:
         default: 'false'
         type: string
+      tf_dont_fail_if_plan_not_empty:
+        default: 'false'
+        type: string
       tf_additional_env_vars:
         default: null
         type: string
@@ -111,8 +114,9 @@ jobs:
           if [[ -n "${env_vars}" ]]; then
             eval "$(echo "$env_vars" | jq -r 'keys[] as $k | "export \($k)=\(.[$k])"')"
           fi
-          #Prepare tfplan file if tf_apply=true, else just check the configuration drift 
-          if ${{ inputs.tf_apply }}; then
+          #Prepare tfplan file if tf_apply=true or if we just need to get the plan, else just check the configuration 
+          #drift and fail pipeline if there are any changes 
+          if ${{ inputs.tf_apply }} || ${{ inputs.tf_dont_fail_if_plan_not_empty }}; then
             ./tf.sh plan -no-color -out plan.tfplan
           else
             ./tf.sh plan -detailed-exitcode
