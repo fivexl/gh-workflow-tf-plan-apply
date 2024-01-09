@@ -39,6 +39,9 @@ on:
       tf_upload_artifacts:
         default: 'false'
         type: string
+      tf_upload_artifact_name_suffix:
+        default: ''
+        type: string
       tf_sh_version:
         default: '0.2.0'
         type: string
@@ -144,5 +147,5 @@ jobs:
         if: ${{ inputs.tf_upload_artifacts == 'true' }}
         uses: actions/upload-artifact@v3.1.2
         with:
-          name: tf_artifacts
+          name: tf_artifacts${{ inputs.tf_upload_artifact_name_suffix }}
           path: ${{ inputs.working_directory }}
