@@ -150,7 +150,7 @@ jobs:
         if: ${{ inputs.tf_upload_artifacts == 'true' }}
         env:
           ARTIFACT_PATH: ${{ inputs.tf_upload_artifact_path || inputs.working_directory }}
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v4.0.0
         with:
           name: tf_artifacts${{ inputs.tf_upload_artifact_name_suffix }}
           path: ${{ env.ARTIFACT_PATH }}
