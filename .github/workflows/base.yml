@@ -39,6 +39,9 @@ on:
       tf_upload_artifacts:
         default: 'false'
         type: string
+      tf_upload_artifact_state_file:
+        default: 'false'
+        type: string
       tf_upload_artifact_name_suffix:
         default: ''
         type: string
@@ -146,6 +149,22 @@ jobs:
           ./tf.sh apply plan.tfplan
           echo "tf_output=$(terraform output -json | jq -c)" >> $GITHUB_OUTPUT
       
+      - name: download state file from s3
+        if: ${{ inputs.tf_upload_artifact_state_file == 'true' }}
+        working-directory: ${{ inputs.working_directory }}
+        env:
+          TF_SKIP_BACKEND_INIT: true
+        run: tf.sh state pull
+
+      - name: upload state file to artifacts
+        if: ${{ inputs.tf_upload_artifact_state_file == 'true' }}
+        working-directory: ${{ inputs.working_directory }}
+        uses: actions/upload-artifact@v4.0.0
+        with:
+          name: tf_artifacts_state_file${{ inputs.tf_upload_artifact_name_suffix }}
+          path: ./.terraform.${{ steps.configure-aws-creds.outputs.aws-account-id }}-${{ inputs.aws_region }}/terraform.tfstate        
+
+
       - name: upload artifacts
         if: ${{ inputs.tf_upload_artifacts == 'true' }}
         env:
