@@ -154,7 +154,7 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
         env:
           TF_SKIP_BACKEND_INIT: true
-        run: tf.sh state pull
+        run: ./tf.sh state pull
 
       - name: upload state file to artifacts
         if: ${{ inputs.tf_upload_artifact_state_file == 'true' }}
