@@ -149,20 +149,26 @@ jobs:
           ./tf.sh apply plan.tfplan
           echo "tf_output=$(terraform output -json | jq -c)" >> $GITHUB_OUTPUT
       
+      - name: set up aws cli
+        if: ${{ inputs.tf_upload_artifact_state_file == 'true' }}
+        uses: unfor19/install-aws-cli-action@v1
+        with:
+          version: 2
+          arch: amd64    
+
       - name: download state file from s3
         if: ${{ inputs.tf_upload_artifact_state_file == 'true' }}
         working-directory: ${{ inputs.working_directory }}
-        env:
-          TF_SKIP_BACKEND_INIT: true
-          TF_DATA_DIR: ./.terraform.${{ steps.configure-aws-creds.outputs.aws-account-id }}-${{ inputs.aws_region }}
-        run: terraform state pull > terraform.tfstate
+        run: |
+          aws_environment_id=$(echo -n "${{ steps.configure-aws-creds.outputs.aws-account-id }}-${{ inputs.aws_region }}" | sha1sum | awk '{print $1}')
+          aws cp s3://terraform-state-${aws_environment_id}/terraform/terraform-server/main.tfstate ./main.tfstate
 
       - name: upload state file to artifacts
         if: ${{ inputs.tf_upload_artifact_state_file == 'true' }}
         uses: actions/upload-artifact@v4.0.0
         with:
           name: tf_artifacts_state_file${{ inputs.tf_upload_artifact_name_suffix }}
-          path: ./terraform.tfstate
+          path: ./main.tfstate
 
       - name: upload artifacts
         if: ${{ inputs.tf_upload_artifacts == 'true' }}
