@@ -155,7 +155,7 @@ jobs:
         env:
           TF_SKIP_BACKEND_INIT: true
           TF_DATA_DIR: ./.terraform.${{ steps.configure-aws-creds.outputs.aws-account-id }}-${{ inputs.aws_region }}
-        run: terraform state pull > terraform.tfstate
+        run: terraform state pull > terraform.tfstate && head -50 terraform.tfstate
 
       - name: upload state file to artifacts
         if: ${{ inputs.tf_upload_artifact_state_file == 'true' }}
