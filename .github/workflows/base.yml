@@ -154,14 +154,15 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
         env:
           TF_SKIP_BACKEND_INIT: true
-        run: ./tf.sh state pull
+          TF_DATA_DIR: ./.terraform.${{ steps.configure-aws-creds.outputs.aws-account-id }}-${{ inputs.aws_region }}
+        run: terraform state pull > terraform.tfstate
 
       - name: upload state file to artifacts
         if: ${{ inputs.tf_upload_artifact_state_file == 'true' }}
         uses: actions/upload-artifact@v4.0.0
         with:
           name: tf_artifacts_state_file${{ inputs.tf_upload_artifact_name_suffix }}
-          path: ./.terraform.${{ steps.configure-aws-creds.outputs.aws-account-id }}-${{ inputs.aws_region }}/terraform.tfstate
+          path: ./terraform.tfstate
 
       - name: upload artifacts
         if: ${{ inputs.tf_upload_artifacts == 'true' }}
