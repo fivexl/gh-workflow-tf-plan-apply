@@ -161,7 +161,7 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
         run: |
           aws_environment_id=$(echo -n "${{ steps.configure-aws-creds.outputs.aws-account-id }}-${{ inputs.aws_region }}" | sha1sum | awk '{print $1}')
-          aws cp s3://terraform-state-${aws_environment_id}/terraform/terraform-server/main.tfstate ./main.tfstate
+          aws s3 cp s3://terraform-state-${aws_environment_id}/terraform/terraform-server/main.tfstate ./main.tfstate
 
       - name: upload state file to artifacts
         if: ${{ inputs.tf_upload_artifact_state_file == 'true' }}
