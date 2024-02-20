@@ -117,6 +117,7 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
         env:
           TF_RECREATE_MISSING_LAMBDA_PACKAGE: ${{ inputs.tf_recreate_missing_lambda_package }}
+          TF_DATA_DIR: ./.terraform.${{ steps.configure-aws-creds.outputs.aws-account-id }}-${{ inputs.aws_region }}
         run: |
           #Set up additional env vars if there are any
           env_vars='${{ inputs.tf_additional_env_vars }}'
@@ -127,6 +128,8 @@ jobs:
           #drift and fail pipeline if there are any changes 
           if ${{ inputs.tf_apply }} || ${{ inputs.tf_dont_fail_if_plan_not_empty }}; then
             ./tf.sh plan -no-color -out plan.tfplan
+            # prepare also human-readable plan
+            terraform show -no-color plan.tfplan > tfplan
           else
             ./tf.sh plan -detailed-exitcode
           fi
