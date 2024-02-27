@@ -36,19 +36,16 @@ on:
       tf_recreate_missing_lambda_package:
         default: 'false'
         type: string
-      tf_upload_artifacts:
+      tf_upload_artifact_name_suffix:
+        default: ''
+        type: string
+      tf_upload_artifact_plan:
         default: 'false'
         type: string
       tf_upload_artifact_state_file:
         default: 'false'
         type: string
-      tf_upload_artifact_name_suffix:
-        default: ''
-        type: string
-      tf_upload_artifact_path:
-        default: ''
-        type: string
-      tf_state_file_path:
+      tf_state_file_path_on_s3:
         default: ''
         type: string      
       tf_sh_version:
@@ -167,22 +164,20 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
         run: |
           aws_environment_id=$(echo -n "${{ steps.configure-aws-creds.outputs.aws-account-id }}-${{ inputs.aws_region }}" | sha1sum | awk '{print $1}')
-          aws s3 cp s3://terraform-state-${aws_environment_id}/${{ inputs.tf_state_file_path }} ./main.tfstate
+          aws s3 cp s3://terraform-state-${aws_environment_id}/${{ inputs.tf_state_file_path_on_s3 }} ./main.tfstate
+          ls -la
+          pwd
 
       - name: upload state file to artifacts
         if: ${{ inputs.tf_upload_artifact_state_file == 'true' }}
-        working-directory: ${{ inputs.working_directory }}
         uses: actions/upload-artifact@v4.0.0
         with:
           name: tf_artifacts_state_file${{ inputs.tf_upload_artifact_name_suffix }}
-          path: ./main.tfstate
+          path: ${{ inputs.working_directory }}/main.tfstate
 
-      - name: upload artifacts
-        if: ${{ inputs.tf_upload_artifacts == 'true' }}
-        working-directory: ${{ inputs.working_directory }}
-        env:
-          ARTIFACT_PATH: ${{ inputs.tf_upload_artifact_path || inputs.working_directory }}
+      - name: upload plan to artifacts
+        if: ${{ inputs.tf_upload_artifacts_plan == 'true' }}
         uses: actions/upload-artifact@v4.0.0
         with:
           name: tf_artifacts${{ inputs.tf_upload_artifact_name_suffix }}
-          path: ${{ env.ARTIFACT_PATH }}
+          path: ${{ inputs.working_directory }}/tfplan
