@@ -176,7 +176,7 @@ jobs:
           path: ${{ inputs.working_directory }}/main.tfstate
 
       - name: upload plan to artifacts
-        if: ${{ inputs.tf_upload_artifacts_plan == 'true' }}
+        if: ${{ inputs.tf_upload_artifact_plan == 'true' }}
         uses: actions/upload-artifact@v4.0.0
         with:
           name: tf_artifacts${{ inputs.tf_upload_artifact_name_suffix }}
