@@ -74,14 +74,14 @@ jobs:
     steps:
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout
-        uses: actions/checkout@v3.5.2
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 1
 
       # Configure AWS
       - name: Configure AWS credentials
         id: configure-aws-creds
-        uses: aws-actions/configure-aws-credentials@v4.0.1
+        uses: aws-actions/configure-aws-credentials@v4.0.2
         with:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ inputs.aws_region }}
@@ -91,7 +91,7 @@ jobs:
 
       # Install terraform
       - name: setup terraform
-        uses: hashicorp/setup-terraform@v2.0.3
+        uses: hashicorp/setup-terraform@v3.0.0
         with:
           terraform_version: ${{ inputs.tf_version }}
           terraform_wrapper: false
@@ -171,14 +171,14 @@ jobs:
 
       - name: upload state file to artifacts
         if: ${{ inputs.tf_upload_artifact_state_file == 'true' }}
-        uses: actions/upload-artifact@v4.0.0
+        uses: actions/upload-artifact@v4.3.1
         with:
           name: tf_artifacts_state_file${{ inputs.tf_upload_artifact_name_suffix }}
           path: ${{ inputs.working_directory }}/${{ inputs.tf_state_file_name }}
 
       - name: upload plan to artifacts
         if: ${{ inputs.tf_upload_artifact_plan == 'true' }}
-        uses: actions/upload-artifact@v4.0.0
+        uses: actions/upload-artifact@v4.3.1
         with:
           name: tf_artifacts_plan${{ inputs.tf_upload_artifact_name_suffix }}
           path: ${{ inputs.working_directory }}/tfplan
