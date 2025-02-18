@@ -61,7 +61,7 @@ on:
 
 jobs:
   terraform:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     env:
       AWS_DEFAULT_REGION: ${{ inputs.aws_default_region }}
       AWS_ROLE_ARN: ${{ inputs.aws_role_arn }}
