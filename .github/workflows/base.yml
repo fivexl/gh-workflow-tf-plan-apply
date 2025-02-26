@@ -3,6 +3,11 @@ name: "Base_workflow"
 on:
   workflow_call:
     inputs:
+      checkout_repository:
+        description: "Repository to checkout"
+        required: false
+        type: string
+        default: ${{ github.repository }}
       aws_region:
         required: true
         type: string
@@ -76,6 +81,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4.1.1
         with:
+          repository: ${{ inputs.checkout_repository }}
           fetch-depth: 1
 
       # Configure AWS
