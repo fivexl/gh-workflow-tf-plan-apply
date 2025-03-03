@@ -12,7 +12,7 @@ on:
         description: "The branch, tag or SHA to checkout"
         required: false
         type: string
-        default: ${{ github.sha }}
+        default: ''
       checkout_fetch_depth:
         description: "Number of commits to fetch"
         required: false
