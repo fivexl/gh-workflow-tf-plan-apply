@@ -8,6 +8,16 @@ on:
         required: false
         type: string
         default: ${{ github.repository }}
+      checkout_commit_sha:
+        description: "The branch, tag or SHA to checkout"
+        required: false
+        type: string
+        default: ${{ github.sha }}
+      checkout_fetch_depth:
+        description: "Number of commits to fetch"
+        required: false
+        type: string
+        default: '1'
       aws_region:
         required: true
         type: string
@@ -82,7 +92,8 @@ jobs:
         uses: actions/checkout@v4.1.1
         with:
           repository: ${{ inputs.checkout_repository }}
-          fetch-depth: 1
+          ref: ${{ inputs.checkout_commit_sha }}
+          fetch-depth: ${{ inputs.checkout_fetch_depth }}
 
       # Configure AWS
       - name: Configure AWS credentials
