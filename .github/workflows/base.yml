@@ -12,12 +12,12 @@ on:
         description: "The branch, tag or SHA to checkout"
         required: false
         type: string
-        default: ''
+        default: ""
       checkout_fetch_depth:
         description: "Number of commits to fetch"
         required: false
         type: string
-        default: '1'
+        default: "1"
       aws_region:
         required: true
         type: string
@@ -28,47 +28,52 @@ on:
         required: true
         type: string
       aws_role_duration:
-        default: '1200'
+        default: "1200"
         type: string
       aws_mask_account_id:
-        default: 'no'
+        default: "no"
         type: string
       working_directory:
         required: true
         type: string
       tf_version:
-        default: 'v1.4.5'
+        default: "v1.4.5"
         type: string
       tf_apply:
-        default: 'false'
+        default: "false"
         type: string
       tf_dont_fail_if_plan_not_empty:
-        default: 'false'
+        default: "false"
         type: string
       tf_additional_env_vars:
         default: null
         type: string
       tf_recreate_missing_lambda_package:
-        default: 'false'
+        default: "false"
         type: string
       tf_upload_artifact_name_suffix:
-        default: ''
+        default: ""
         type: string
       tf_upload_artifact_plan:
-        default: 'false'
+        default: "false"
         type: string
       tf_upload_artifact_state_file:
-        default: 'false'
+        default: "false"
         type: string
       tf_state_file_dir_on_s3:
-        default: ''
-        type: string      
-      tf_state_file_name:
-        default: ''
-        type: string      
-      tf_sh_version:
-        default: '0.2.0'
+        default: ""
         type: string
+      tf_state_file_name:
+        default: ""
+        type: string
+      tf_sh_version:
+        default: "0.2.0"
+        type: string
+      slack_webhook_url:
+        description: "Slack webhook URL for notifications"
+        required: false
+        type: string
+        default: ""
     outputs:
       tf_output:
         description: "The output of the tf output -json command"
@@ -151,7 +156,20 @@ jobs:
             # prepare also human-readable plan
             terraform show -no-color plan.tfplan > tfplan
           else
-            ./tf.sh plan -detailed-exitcode
+            # Run plan and capture output
+            PLAN_OUTPUT=$(./tf.sh plan -detailed-exitcode 2>&1)
+            PLAN_EXIT_CODE=$?
+            
+            # If plan shows changes and Slack webhook is provided, send notification
+            if [ $PLAN_EXIT_CODE -eq 2 ] && [ -n "${{ inputs.slack_webhook_url }}" ]; then
+              PLAN_SUMMARY=$(echo "$PLAN_OUTPUT" | grep -A 1 "Plan:" | tail -n 1)
+              curl -X POST -H 'Content-type: application/json' \
+                --data "{\"text\":\"🚨 Terraform plan shows changes in ${{ github.repository }} (${{ github.ref_name }}):\n\`\`\`$PLAN_SUMMARY\`\`\`\"}" \
+                "${{ inputs.slack_webhook_url }}"
+            fi
+            
+            # Exit with the original plan exit code
+            exit $PLAN_EXIT_CODE
           fi
 
       # Apply, prepare output
@@ -171,13 +189,13 @@ jobs:
           fi
           ./tf.sh apply plan.tfplan
           echo "tf_output=$(terraform output -json | jq -c)" >> $GITHUB_OUTPUT
-      
+
       - name: set up aws cli
         if: ${{ inputs.tf_upload_artifact_state_file == 'true' }}
         uses: unfor19/install-aws-cli-action@v1
         with:
           version: 2
-          arch: amd64    
+          arch: amd64
 
       - name: download state file from s3
         if: ${{ inputs.tf_upload_artifact_state_file == 'true' }}
