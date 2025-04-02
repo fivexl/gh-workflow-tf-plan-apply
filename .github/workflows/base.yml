@@ -156,9 +156,12 @@ jobs:
             # prepare also human-readable plan
             terraform show -no-color plan.tfplan > tfplan
           else
-            # Run plan and capture output while showing it in real-time
-            PLAN_OUTPUT=$(./tf.sh plan -detailed-exitcode 2>&1 | tee /dev/tty)
+            # Run plan and capture both output and exit code
+            PLAN_OUTPUT=$(./tf.sh plan -detailed-exitcode 2>&1)
             PLAN_EXIT_CODE=$?
+            
+            # Show the plan output
+            echo "$PLAN_OUTPUT"
             
             # If plan shows changes and Slack webhook is provided, send notification
             if [ $PLAN_EXIT_CODE -eq 2 ] && [ -n "${{ inputs.slack_webhook_url }}" ]; then
