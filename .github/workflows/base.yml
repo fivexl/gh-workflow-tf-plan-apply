@@ -74,6 +74,11 @@ on:
         required: false
         type: string
         default: ""
+      environment:
+        description: "Environment name for the deployment"
+        required: false
+        type: string
+        default: ""
     outputs:
       tf_output:
         description: "The output of the tf output -json command"
@@ -169,7 +174,7 @@ jobs:
             if [ $PLAN_EXIT_CODE -eq 2 ] && [ -n "${{ inputs.slack_webhook_url }}" ]; then
               echo "Sending Slack notification for non-empty plan..."
               SLACK_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST -H 'Content-type: application/json' \
-                --data "{\"text\":\"🚨 Terraform plan shows changes in ${{ github.repository }} (${{ github.ref_name }}):\nSee the changes here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+                --data "{\"text\":\"🚨 *Environment: ${{ inputs.environment }}*\nTerraform plan shows changes in ${{ github.repository }} (${{ github.ref_name }}):\nSee the changes here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}\"}" \
                 "${{ inputs.slack_webhook_url }}")
               SLACK_STATUS=$(echo "$SLACK_RESPONSE" | tail -n1)
               SLACK_BODY=$(echo "$SLACK_RESPONSE" | sed '$d')
@@ -181,7 +186,6 @@ jobs:
                 echo "Response: $SLACK_BODY"
               fi
             fi
-            
             
             # Exit with the original plan exit code
             exit $PLAN_EXIT_CODE
