@@ -137,12 +137,18 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
         run: terraform fmt --recursive -check=true
 
+      - name: Debug Slack Webhook
+        run: |
+          echo "Slack webhook URL: '${{ inputs.slack_webhook_url }}'"
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Debugging Slack webhook in GitHub Actions"}' "${{ inputs.slack_webhook_url }}"
+
       # Run terraform plan
       - name: terraform plan
         working-directory: ${{ inputs.working_directory }}
         env:
           TF_RECREATE_MISSING_LAMBDA_PACKAGE: ${{ inputs.tf_recreate_missing_lambda_package }}
           TF_DATA_DIR: ./.terraform.${{ steps.configure-aws-creds.outputs.aws-account-id }}-${{ inputs.aws_region }}
+          ACTIONS_STEP_DEBUG: true
         run: |
           #Set up additional env vars if there are any
           env_vars='${{ inputs.tf_additional_env_vars }}'
