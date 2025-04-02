@@ -137,18 +137,12 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
         run: terraform fmt --recursive -check=true
 
-      - name: Debug Slack Webhook
-        run: |
-          echo "Slack webhook URL: '${{ inputs.slack_webhook_url }}'"
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"Debugging Slack webhook in GitHub Actions"}' "${{ inputs.slack_webhook_url }}"
-
       # Run terraform plan
       - name: terraform plan
         working-directory: ${{ inputs.working_directory }}
         env:
           TF_RECREATE_MISSING_LAMBDA_PACKAGE: ${{ inputs.tf_recreate_missing_lambda_package }}
           TF_DATA_DIR: ./.terraform.${{ steps.configure-aws-creds.outputs.aws-account-id }}-${{ inputs.aws_region }}
-          ACTIONS_STEP_DEBUG: true
         run: |
           #Set up additional env vars if there are any
           env_vars='${{ inputs.tf_additional_env_vars }}'
@@ -162,6 +156,7 @@ jobs:
             # prepare also human-readable plan
             terraform show -no-color plan.tfplan > tfplan
           else
+            set +e
             # Run plan and capture both output and exit code
             PLAN_OUTPUT=$(./tf.sh plan -detailed-exitcode 2>&1)
             PLAN_EXIT_CODE=$?
@@ -187,6 +182,7 @@ jobs:
               fi
             fi
             
+            set -e
             # Exit with the original plan exit code
             exit $PLAN_EXIT_CODE
           fi
