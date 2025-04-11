@@ -100,6 +100,7 @@ jobs:
       contents: write
     outputs:
       tf_output: ${{ steps.apply.outputs.tf_output }}
+      tf_plan_exit_code: ${{ steps.plan.outputs.tf_plan_exit_code }}
 
     steps:
       # Checkout the repository to the GitHub Actions runner
@@ -148,7 +149,8 @@ jobs:
         run: terraform fmt --recursive -check=true
 
       # Run terraform plan
-      - name: terraform plan
+      - id: plan
+        name: terraform plan
         working-directory: ${{ inputs.working_directory }}
         env:
           TF_RECREATE_MISSING_LAMBDA_PACKAGE: ${{ inputs.tf_recreate_missing_lambda_package }}
