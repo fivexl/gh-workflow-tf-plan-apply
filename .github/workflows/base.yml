@@ -45,6 +45,9 @@ on:
       tf_dont_fail_if_plan_not_empty:
         default: "false"
         type: string
+      tf_get_plan_exit_code:
+        default: "false"
+        type: string
       tf_additional_env_vars:
         default: null
         type: string
@@ -81,6 +84,9 @@ on:
       tf_output:
         description: "The output of the tf output -json command"
         value: ${{ jobs.terraform.outputs.tf_output }}
+      tf_plan_exit_code:
+        description: "The exit code of the terraform plan command"
+        value: ${{ jobs.terraform.outputs.tf_plan_exit_code }}
 
 jobs:
   terraform:
@@ -162,7 +168,7 @@ jobs:
           else
             set +e
             # Run plan and capture both output and exit code
-            PLAN_OUTPUT=$(./tf.sh plan -detailed-exitcode 2>&1)
+            PLAN_OUTPUT=$(./tf.sh plan -detailed-exitcode -no-color -out plan.tfplan 2>&1)
             PLAN_EXIT_CODE=$?
             set -e
             
@@ -193,8 +199,14 @@ jobs:
               fi
             fi
             
-            # Exit with the original plan exit code
-            exit $PLAN_EXIT_CODE
+
+            if ${{ inputs.tf_get_plan_exit_code }}; then
+              # Put the plan exit code in the output
+              echo "tf_plan_exit_code=$PLAN_EXIT_CODE" >> $GITHUB_OUTPUT
+            else
+              # Exit with the original plan exit code
+              exit $PLAN_EXIT_CODE
+            fi
           fi
 
       # Apply, prepare output
