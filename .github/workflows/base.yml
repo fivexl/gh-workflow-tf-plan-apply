@@ -171,7 +171,7 @@ jobs:
             PLAN_OUTPUT=$(./tf.sh plan -detailed-exitcode -no-color -out plan.tfplan 2>&1)
             PLAN_EXIT_CODE=$?
             set -e
-            
+
             # Show the plan output
             echo "$PLAN_OUTPUT"
 
@@ -201,6 +201,8 @@ jobs:
             
 
             if ${{ inputs.tf_get_plan_exit_code }}; then
+              # Save human-readable plan so we can upload it to artifacts
+              terraform show -no-color plan.tfplan > tfplan
               # Put the plan exit code in the output
               echo "tf_plan_exit_code=$PLAN_EXIT_CODE" >> $GITHUB_OUTPUT
             else
