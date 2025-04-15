@@ -19,12 +19,10 @@ on:
         type: string
         default: "1"
       checkout_ci:
-        description: "The CI system name"
+        description: "The CI system name, could be github or gitlab"
         required: false
-        type: choice
-        options:
-          - github
-          - gitlab
+        type: string
+        default: "github"
       aws_region:
         required: true
         type: string
@@ -110,6 +108,13 @@ jobs:
       tf_plan_exit_code: ${{ steps.plan.outputs.tf_plan_exit_code }}
 
     steps:
+      # Validate checkout_ci input
+      - name: Validate checkout_ci input
+        if: ${{ inputs.checkout_ci != 'github' && inputs.checkout_ci != 'gitlab' }}
+        run: |
+          echo "Error: checkout_ci must be either 'github' or 'gitlab', but got '${{ inputs.checkout_ci }}'"
+          exit 1
+
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout Github
         if: ${{ inputs.checkout_ci == 'github' }}
