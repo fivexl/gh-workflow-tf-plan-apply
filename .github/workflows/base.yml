@@ -18,6 +18,13 @@ on:
         required: false
         type: string
         default: "1"
+      checkout_ci:
+        description: "The CI system name"
+        required: false
+        type: choice
+        options:
+          - github
+          - gitlab
       aws_region:
         required: true
         type: string
@@ -104,12 +111,23 @@ jobs:
 
     steps:
       # Checkout the repository to the GitHub Actions runner
-      - name: Checkout
+      - name: Checkout Github
+        if: ${{ inputs.checkout_ci == 'github' }}
         uses: actions/checkout@v4.1.1
         with:
           repository: ${{ inputs.checkout_repository }}
           ref: ${{ inputs.checkout_commit_sha }}
           fetch-depth: ${{ inputs.checkout_fetch_depth }}
+
+      - name: Checkout Gitlab
+        if: ${{ inputs.checkout_ci == 'gitlab' }}
+        run: |
+          git clone https://gitlab.com/${{ inputs.checkout_repository }}.git
+          repo_name=${{ inputs.checkout_repository }}
+          repo_name=${repo_name#*/}
+          cd $repo_name
+          git checkout ${{ inputs.checkout_commit_sha }}
+          git fetch --depth ${{ inputs.checkout_fetch_depth }}
 
       # Configure AWS
       - name: Configure AWS credentials
