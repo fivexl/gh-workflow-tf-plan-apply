@@ -127,10 +127,7 @@ jobs:
       - name: Checkout Gitlab
         if: ${{ inputs.checkout_ci == 'gitlab' }}
         run: |
-          git clone https://gitlab.com/${{ inputs.checkout_repository }}.git
-          repo_name=${{ inputs.checkout_repository }}
-          repo_name=${repo_name#*/}
-          cd $repo_name
+          git clone https://gitlab.com/${{ inputs.checkout_repository }}.git .
           git checkout ${{ inputs.checkout_commit_sha }}
           git fetch --depth ${{ inputs.checkout_fetch_depth }}
 
