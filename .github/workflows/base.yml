@@ -151,7 +151,12 @@ jobs:
 
       - name: Download tf.sh
         working-directory: ${{ inputs.working_directory }}
-        run: curl https://releases.fivexl.io/tf/v${{ inputs.tf_sh_version }}/tf.sh --output tf.sh && chmod +x ./tf.sh
+        run: |
+          if [ ! -f tf.sh ]; then
+            echo "tf.sh not found, downloading v${{ inputs.tf_sh_version }}..."
+            curl -sSL https://releases.fivexl.io/tf/v${{ inputs.tf_sh_version }}/tf.sh --output tf.sh
+          fi
+          chmod +x tf.sh
 
       # Initialize
       - name: terraform init
