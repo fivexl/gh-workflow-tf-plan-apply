@@ -158,6 +158,11 @@ jobs:
           fi
           chmod +x tf.sh
 
+      # Check terraform specs format
+      - name: terraform fmt
+        working-directory: ${{ inputs.working_directory }}
+        run: terraform fmt --recursive -check=true
+
       # Initialize
       - name: terraform init
         working-directory: ${{ inputs.working_directory }}
@@ -167,11 +172,6 @@ jobs:
       - name: terraform validate
         working-directory: ${{ inputs.working_directory }}
         run: terraform validate -no-color
-
-      # Check terraform specs format
-      - name: terraform fmt
-        working-directory: ${{ inputs.working_directory }}
-        run: terraform fmt --recursive -check=true
 
       # Run terraform plan
       - id: plan
