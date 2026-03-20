@@ -36,7 +36,7 @@ on:
         default: "1200"
         type: string
       aws_mask_account_id:
-        default: "no"
+        default: 'false'
         type: string
       working_directory:
         required: true
