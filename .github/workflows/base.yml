@@ -36,7 +36,7 @@ on:
         default: "1200"
         type: string
       aws_mask_account_id:
-        default: "no"
+        default: 'false'
         type: string
       working_directory:
         required: true
@@ -118,7 +118,7 @@ jobs:
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout Github
         if: ${{ inputs.checkout_ci == 'github' }}
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: ${{ inputs.checkout_repository }}
           ref: ${{ inputs.checkout_commit_sha }}
@@ -134,7 +134,7 @@ jobs:
       # Configure AWS
       - name: Configure AWS credentials
         id: configure-aws-creds
-        uses: aws-actions/configure-aws-credentials@v4.0.2
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
         with:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ inputs.aws_region }}
@@ -144,7 +144,7 @@ jobs:
 
       # Install terraform
       - name: setup terraform
-        uses: hashicorp/setup-terraform@v3.0.0
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
         with:
           terraform_version: ${{ inputs.tf_version }}
           terraform_wrapper: false
@@ -272,14 +272,14 @@ jobs:
 
       - name: upload state file to artifacts
         if: ${{ inputs.tf_upload_artifact_state_file == 'true' }}
-        uses: actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: tf_artifacts_state_file${{ inputs.tf_upload_artifact_name_suffix }}
           path: ${{ inputs.working_directory }}/${{ inputs.tf_state_file_name }}
 
       - name: upload plan to artifacts
         if: ${{ inputs.tf_upload_artifact_plan == 'true' }}
-        uses: actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: tf_artifacts_plan${{ inputs.tf_upload_artifact_name_suffix }}
           path: ${{ inputs.working_directory }}/tfplan
